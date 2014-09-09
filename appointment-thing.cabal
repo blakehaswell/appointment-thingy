@@ -21,6 +21,7 @@ executable appointment-thing
   -- other-extensions:
   build-depends:       aeson,
                        base >=4.6 && <4.7,
+                       http-types,
                        scotty
   hs-source-dirs:      src
   default-language:    Haskell2010

@@ -1,9 +1,11 @@
 module Staff where
 
 import Control.Applicative
+import Control.Exception
 import Control.Monad
 import Data.Aeson
 import Debug.Trace
+import Network.HTTP.Types.Status
 import Web.Scotty
 
 data Staff = Staff { getId    :: Int,
@@ -17,7 +19,18 @@ instance FromJSON Staff where
               <*> v .: "email"
     parseJSON _ = mzero
 
+instance ToJSON Staff where
+    toJSON s = object [ "id"    .= getId s,
+                        "name"  .= getName s,
+                        "email" .= getEmail s ]
+
 createStaff :: ActionM ()
-createStaff = do
-    staff <- jsonData :: ActionM Staff
-    text $ traceShow staff "ok"
+createStaff = flip rescue errorResponse $ do
+        name  <- param "name"
+        email <- param "email"
+        let staff = Staff 1 name email
+        traceShow (encode staff) $ text "ok"
+    where
+        errorResponse _ = do
+            status status400
+            text "Invalid staff."
